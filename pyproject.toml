@@ -1,0 +1,26 @@
+[project]
+name = "dash-cytoscape-aio"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "minefuto", email = "46558834+minefuto@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "dash>=4.5.0",
+    "dash-cytoscape>=1.0.2",
+    "dash-iconify>=0.1.2",
+    "dash-mantine-components>=3.0.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+    "ty>=0.0.94",
+]

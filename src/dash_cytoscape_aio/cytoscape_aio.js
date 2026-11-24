@@ -55,6 +55,8 @@
                 if (!ok) console.error("CytoscapeAIO: element without data.id", e);
                 return ok;
             });
+            const listed = els.filter(e => e.selectable !== false);
+            const listable = new Set(listed.map(e => String(e.data.id)));
             const isEdge = e => e.group === "edges" || e.data.source !== undefined;
             const fill = (t, d) => t.replace(/\{(\w+)\}/g, (_, k) => d[k] ?? "");
             const item = (e, t) => ({value: String(e.data.id), label: fill(t, e.data)});
@@ -62,7 +64,7 @@
             const withSelection = ids => {
                 let changed = false;
                 const out = elements.map(e => {
-                    if (!e.data || e.data.id == null) return e;
+                    if (!e.data || e.data.id == null || e.selectable === false) return e;
                     const want = ids.includes(String(e.data.id));
                     if (e.selected === want) return e;
                     changed = true;
@@ -75,7 +77,8 @@
             let data = NU, newValue = NU, newElements = NU, nodeData = NU, edgeData = NU;
 
             if (props.includes("selectedNodeData") || props.includes("selectedEdgeData")) {
-                const ids = [...(selNodes || []), ...(selEdges || [])].map(d => String(d.id));
+                const ids = [...(selNodes || []), ...(selEdges || [])].map(d => String(d.id))
+                    .filter(id => listable.has(id));
                 if (!same(ids, cur)) {
                     newValue = ids;
                     zoom(ids);
@@ -86,14 +89,13 @@
                 if (newElements !== NU) zoom(cur);
             } else {
                 data = [
-                    {group: "Nodes", items: els.filter(e => !isEdge(e)).map(e => item(e, labels.node))},
-                    {group: "Edges", items: els.filter(isEdge).map(e => item(e, labels.edge))},
+                    {group: "Nodes", items: listed.filter(e => !isEdge(e)).map(e => item(e, labels.node))},
+                    {group: "Edges", items: listed.filter(isEdge).map(e => item(e, labels.edge))},
                 ];
-                const known = new Set(els.map(e => String(e.data.id)));
-                let ids = cur.filter(id => known.has(id));
+                let ids = cur.filter(id => listable.has(id));
                 if (!props.includes("elements")) {
                     const picked = els.filter(e => e.selected);
-                    ids = picked.map(e => String(e.data.id));
+                    ids = picked.map(e => String(e.data.id)).filter(id => listable.has(id));
                     nodeData = picked.filter(e => !isEdge(e)).map(e => e.data);
                     edgeData = picked.filter(isEdge).map(e => e.data);
                 }
